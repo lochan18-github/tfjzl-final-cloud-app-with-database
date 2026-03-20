@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Question, Choice, Submission
+from .models import Question, Choice, Submission, Lesson, Course, Instructor
+
 
 # Inline for Choices
 class ChoiceInline(admin.TabularInline):
@@ -13,24 +14,13 @@ class QuestionInline(admin.TabularInline):
     extra = 2
 
 
-# Admin for Question
+# Question Admin
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [ChoiceInline]
     list_display = ('question_text',)
 
 
-# Dummy Lesson model (since not defined earlier)
-# You NEED this for grading
-from django.db import models
-
-class Lesson(models.Model):
-    title = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.title
-
-
-# Admin for Lesson
+# Lesson Admin
 class LessonAdmin(admin.ModelAdmin):
     inlines = [QuestionInline]
 
@@ -40,3 +30,5 @@ admin.site.register(Question, QuestionAdmin)
 admin.site.register(Choice)
 admin.site.register(Submission)
 admin.site.register(Lesson, LessonAdmin)
+admin.site.register(Course)
+admin.site.register(Instructor)
