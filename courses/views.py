@@ -1,51 +1,36 @@
-from django.shortcuts import render
-from .models import Question, Choice, Submission
+from django.shortcuts import render, get_object_or_404
+from .models import Question, Choice, Submission, Course
 
 
-# Submit exam answers
-def submit(request):
-    if request.method == "POST":
-        score = 0
-        total = 0
-
-        questions = Question.objects.all()
-
-        for question in questions:
-            selected_choice_id = request.POST.get(str(question.id))
-            total += 1
-
-            if selected_choice_id:
-                selected_choice = Choice.objects.get(id=selected_choice_id)
-
-                # Save submission
-                Submission.objects.create(
-                    question=question,
-                    selected_choice=selected_choice
-                )
-
-                if selected_choice.is_correct:
-                    score += 1
-
-        return render(request, "result.html", {
-            "score": score,
-            "total": total
-        })
-
-    return render(request, "submit.html")
-
-
-# Show exam result
 def show_exam_result(request):
-    submissions = Submission.objects.all()
+    # Dummy course (since no real DB)
+    course = Course(name="Sample Course")
 
-    score = 0
-    total = submissions.count()
+    questions = Question.objects.all()
+    selected_ids = []
 
-    for submission in submissions:
-        if submission.selected_choice.is_correct:
-            score += 1
+    total_score = 0
+    possible_score = 0
 
-    return render(request, "result.html", {
-        "score": score,
-        "total": total
+    for question in questions:
+        possible_score += 1
+
+        # simulate selected choice (just take first correct)
+        correct_choice = Choice.objects.filter(question=question, is_correct=True).first()
+
+        if correct_choice:
+            selected_ids.append(correct_choice.id)
+            total_score += 1
+
+    # Grade calculation
+    if possible_score > 0:
+        grade = (total_score / possible_score) * 100
+    else:
+        grade = 0
+
+    return render(request, "exam_result_bootstrap.html", {
+        "course": course,
+        "selected_ids": selected_ids,
+        "grade": grade,
+        "possible": possible_score
     })
